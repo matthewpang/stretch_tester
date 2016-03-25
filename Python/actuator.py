@@ -82,7 +82,7 @@ def main():
         elif go_max == 1:
             go(initial_displacement + stretch_length)
 
-        elif go_zero == 0:
+        elif go_zero == 1:
             go(0)
 
         elif reset == 1:
