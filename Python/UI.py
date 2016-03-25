@@ -21,10 +21,11 @@ def resetter(dump):
     reset.set(1)
 
 def simple_defaults():
-    zero_stretch_delay.set(0.5)
-    max_stretch_delay.set(0.5)
-    max_speed.set(8)
-    min_speed.set(8)
+    initial_displacement.set(0)
+    stretch_length.set(0)
+    zero_stretch_delay.set(0)
+    max_stretch_delay.set(0)
+
 
 #ON/OFF SWITCH
 
