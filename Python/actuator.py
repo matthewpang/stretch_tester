@@ -34,6 +34,9 @@ def output_decoder(array):
         return int(a)
 
 def serial_send(value):
+    """
+    Accepts a 16 bit unsigned int , encodes it and sends it, returns the bytearray that was sent
+    """
     serStepper.reset_input_buffer()
     serStepper.reset_output_buffer()
     frame = output_encoder(value)
@@ -41,6 +44,9 @@ def serial_send(value):
     return frame
 
 def serial_receive():
+    """
+    Waits up to 3 seconds for a response after being called, decodes the byte array and returns a 16 bit unsigned int
+    """
     timeout = time.time() + 3
     while (serStepper.in_waiting <= 3) and (time.time() < timeout): # Wait until correct number of packets, timeout if waiting too long
         time.sleep(0.0001)
@@ -49,17 +55,24 @@ def serial_receive():
     return val
 
 def go(pos=0):
+    """
+    Accepts a position and sends it serially. This is a trivially useless function until we implement more complex movement patterns
+    """
     serial_send(pos)
 
 
 def gobetween(mode, min_position=0, max_position=0, zero_stretch_delay=0, max_stretch_delay=0):
+    """
+    Checks for the correct mode and positions , otherwise do nothing
+    Goes to initial displacement, waits time, goes to maximum displacement, waits time, returns.
+    """
+
     if (on_off == 0) or (mode != 0) or (min_position == max_position):
         return
-    go(max_position)
-    time.sleep(max_stretch_delay)
     go(min_position)
     time.sleep(zero_stretch_delay)
-
+    go(max_position)
+    time.sleep(max_stretch_delay)
     return
 
 
@@ -78,6 +91,9 @@ mode = 0
 reset = 0
 
 def read():
+    """
+    Does nasty nasty file I/O with nasty nasty global variables. I'm really sorry.
+    """
     global on_off
     global v_zero
     global stretch_length
@@ -108,6 +124,9 @@ def read():
 
 
 def main():
+    """
+    Its obvious what this does.
+    """
     while True:
         try:
             read()
