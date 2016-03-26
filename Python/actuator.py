@@ -3,20 +3,58 @@ __author__ = 'matthewpang'
 import serial
 import time
 import pickle
+import struct
 
 serStepper = serial.Serial('/dev/cu.usbmodem1421', 230400)
 
+def output_encoder(value):
+    """
+    Takes a 16 bit integer value, packs it little endian, then encapsulates it in the defined format
+    [0xAA,LSByte,MSByte,OxFF]
+    """
+    b = struct.pack('<H', value)
+    output = bytearray(4)
+    output[0] = 0xAA
+    output[1] = b[0]
+    output[2] = b[1]
+    output[3] = 0xFF
+
+    return output
+
+def output_decoder(array):
+    """
+    Takes a little endian byte array of format [0xAA,LSByte,MSByte,OxFF]
+    and returns the corresponding 16 bit integer value
+    """
+    if len(array) != 4: #If the packet length is correct, otherwise return None
+        return None
+
+    if (array[0] == 0xAA) and (array[3] == 0XFF) and len(array) == 4: #Check that the packet has the correct start and end frame
+        a = array[2] << 8 | array[1]
+        return int(a)
+
+def serial_send(value):
+    serStepper.reset_input_buffer()
+    serStepper.reset_output_buffer()
+    frame = output_encoder(value)
+    serStepper.write(frame)
+    return frame
+
+def serial_receive():
+    timeout = time.time() + 3
+    while (serStepper.in_waiting <= 3) and (time.time() < timeout): # Wait until correct number of packets, timeout if waiting too long
+        time.sleep(0.0001)
+    else:
+        val = output_decoder(serStepper.read(serStepper.in_waiting))
+    return val
 
 def go(pos=0):
-    serStepper.flushOutput()
-    serStepper.flushInput()
-    #serStepper.write(chr(pos)) #Write the correctly formatted byte packets here
+    serial_send(pos)
 
 
 def gobetween(mode, min_position=0, max_position=0, zero_stretch_delay=0, max_stretch_delay=0):
     if (on_off == 0) or (mode != 0) or (min_position == max_position):
         return
-
     go(max_position)
     time.sleep(max_stretch_delay)
     go(min_position)
