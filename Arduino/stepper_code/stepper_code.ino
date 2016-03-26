@@ -44,6 +44,7 @@ void get_input() {
   if (rawinput[0] == 170 && rawinput[3] == 255) {
     input = rawinput[1] | rawinput[2] << 8;
     arrival = 0; // when we receive a correctly formatted message send - reset the arrival message tracker
+    stepper.enableDriver(); //turn on the driver when we receive a message 
   }
 }
 
@@ -91,7 +92,8 @@ void loop() {
     input = 0x0000; // Reset input
   }
   if ((abs(accelStepper.distanceToGo()) == 0) && (arrival == 0)) {
-    send_output(0xFF00);
+    send_output(0xFF00); // send arrival opcode 
+    stepper.disableDriver(); //disable the driver when we have arrived
     arrival = 1;
   }
   /*
