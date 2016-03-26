@@ -37,28 +37,41 @@ def serial_send(value):
     """
     Accepts a 16 bit unsigned int , encodes it and sends it, returns the bytearray that was sent
     """
-    serStepper.reset_input_buffer()
-    serStepper.reset_output_buffer()
     frame = output_encoder(value)
     serStepper.write(frame)
     return frame
 
 def serial_receive():
     """
-    Waits up to 3 seconds for a response after being called, decodes the byte array and returns a 16 bit unsigned int
+    Waits up to 5 seconds for a response after being called, decodes the byte array and returns a 16 bit unsigned int
     """
-    timeout = time.time() + 3
+    timeout = time.time() + 5
     while (serStepper.in_waiting <= 3) and (time.time() < timeout): # Wait until correct number of packets, timeout if waiting too long
         time.sleep(0.0001)
     else:
-        val = output_decoder(serStepper.read(serStepper.in_waiting))
+        serial_read = (serStepper.read(serStepper.in_waiting))
+        val = output_decoder(serial_read)
     return val
+
+def arrival_wait():
+    """
+    Waits the get the arrival confirmation message 0xFF00 .
+    Clears the buffers for cleanliness
+    """
+    timeout = time.time() + 10
+    while (serial_receive() != 0xFF00) and (time.time() <= timeout):
+        time.sleep(0.0001)
+    serStepper.reset_input_buffer()
+    serStepper.reset_output_buffer()
 
 def go(pos=0):
     """
-    Accepts a position and sends it serially. This is a trivially useless function until we implement more complex movement patterns
+    Accepts a position and sends it serially.
+    Waits for arrival confirmation
     """
+
     serial_send(pos)
+    arrival_wait()
 
 
 def gobetween(mode, min_position=0, max_position=0, zero_stretch_delay=0, max_stretch_delay=0):
@@ -66,7 +79,6 @@ def gobetween(mode, min_position=0, max_position=0, zero_stretch_delay=0, max_st
     Checks for the correct mode and positions , otherwise do nothing
     Goes to initial displacement, waits time, goes to maximum displacement, waits time, returns.
     """
-
     if (on_off == 0) or (mode != 0) or (min_position == max_position):
         return
     go(min_position)
@@ -144,6 +156,7 @@ def main():
 
         elif reset == 1:
             go(65281) #0xFF01
+
 
         else:
 

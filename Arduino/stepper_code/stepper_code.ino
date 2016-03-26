@@ -3,11 +3,12 @@
 #include <AccelStepper.h>
 
 //Define Global Input Variable
-word input = 65535; // 0xFFFF is reserved and never used
+word input = 0; // Input
+word arrival = 0; //Have we sent the arrival message?
 
 //Define Speed and Acceleration Variable
-float max_speed = 200.0;
-float max_acceleration = 200.0;
+float max_speed = 10000.0;
+float max_acceleration = 10000.0;
 
 //Define Stepper Variables
 const uint8_t amisDirPin = 2;
@@ -42,6 +43,7 @@ void get_input() {
   }
   if (rawinput[0] == 170 && rawinput[3] == 255) {
     input = rawinput[1] | rawinput[2] << 8;
+    arrival = 0; // when we receive a correctly formatted message send - reset the arrival message tracker
   }
 }
 
@@ -71,24 +73,32 @@ void loop() {
   get_input();
 
   //Run the stepper
-  accelStepper.run();
+  accelStepper.run(); // run stepper
 
   //Move the Stepper
   //Stage is 20 steps/10 mils
   long destination = 0;
   if (input >= 0 && input <= 10000) { //Range Between 0x0000 and 0x2710
-    destination = -2 * input;
-    accelStepper.moveTo(destination) ;
-
+    destination = (input * -2L);
+    accelStepper.moveTo(destination);
   }
-
-  else if (input == 0xFF01) { // 0xFF01 - Homing Op Code
+  else if (input == 0xFF01) { // 0xFF01 - Homing Op Code, Blocking
     accelStepper.moveTo(10000);
     while (abs(accelStepper.distanceToGo()) > 0) {
       accelStepper.run();
     }
-    accelStepper.setCurrentPosition(0);
-    send_output(0xFF02);// 0xFF02 - "I am Home" Confirmation response
+    accelStepper.setCurrentPosition(0); //Reset the position variable
+    input = 0x0000; // Reset input
   }
+  if ((abs(accelStepper.distanceToGo()) == 0) && (arrival == 0)) {
+    send_output(0xFF00);
+    arrival = 1;
+  }
+  /*
+    List of op codes :
+    Go to position X - 0x0000 - 0x0x2710
+    We have arrived at the desired position - 0xFF00
+    Home stepper - 0xFF01
+  */
 
 }
