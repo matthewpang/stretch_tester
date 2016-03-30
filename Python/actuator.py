@@ -5,7 +5,7 @@ import time
 import pickle
 import struct
 
-serStepper = serial.Serial('/dev/cu.usbmodem1421', 230400)
+serStepper = serial.Serial('/dev/cu.usbmodem14231', 230400)
 
 def output_encoder(value):
     """

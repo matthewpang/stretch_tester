@@ -7,8 +7,8 @@ word input = 0; // Input
 word arrival = 0; //Have we sent the arrival message?
 
 //Define Speed and Acceleration Variable
-float max_speed = 10000.0;
-float max_acceleration = 10000.0;
+float max_speed = 2000000.0;
+float max_acceleration = 500.0;
 
 //Define Stepper Variables
 const uint8_t amisDirPin = 2;
@@ -44,7 +44,7 @@ void get_input() {
   if (rawinput[0] == 170 && rawinput[3] == 255) {
     input = rawinput[1] | rawinput[2] << 8;
     arrival = 0; // when we receive a correctly formatted message send - reset the arrival message tracker
-    stepper.enableDriver(); //turn on the driver when we receive a message 
+    stepper.enableDriver(); //turn on the driver when we receive a message
   }
 }
 
@@ -60,7 +60,7 @@ void setup() {
   //Configure the Steppers
   stepper.resetSettings();
   stepper.setCurrentMilliamps(1700);
-  stepper.setStepMode(1);
+  stepper.setStepMode(32);
   stepper.enableDriver();
   delay(5);
 
@@ -80,11 +80,11 @@ void loop() {
   //Stage is 20 steps/10 mils
   long destination = 0;
   if (input >= 0 && input <= 10000) { //Range Between 0x0000 and 0x2710
-    destination = (input * -2L);
-    accelStepper.moveTo(destination);
+    destination = (input * 64L);
+    accelStepper.moveTo(destination); 
   }
   else if (input == 0xFF01) { // 0xFF01 - Homing Op Code, Blocking
-    accelStepper.moveTo(10000);
+    accelStepper.moveTo(-64000 * 8);
     while (abs(accelStepper.distanceToGo()) > 0) {
       accelStepper.run();
     }
@@ -92,7 +92,7 @@ void loop() {
     input = 0x0000; // Reset input
   }
   if ((abs(accelStepper.distanceToGo()) == 0) && (arrival == 0)) {
-    send_output(0xFF00); // send arrival opcode 
+    send_output(0xFF00); // send arrival opcode
     stepper.disableDriver(); //disable the driver when we have arrived
     arrival = 1;
   }

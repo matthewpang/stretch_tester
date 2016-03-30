@@ -60,7 +60,7 @@ def arrival_wait():
     Waits the get the arrival confirmation message 0xFF00 .
     Clears the buffers for cleanliness
     """
-    timeout = time.time() + 30
+    timeout = time.time() + 600
     while (serial_receive() != 0xFF00) and (time.time() <= timeout):
         time.sleep(0.0001)
     serStepper.reset_input_buffer()

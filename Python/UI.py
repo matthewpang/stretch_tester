@@ -68,15 +68,21 @@ Button(button_frame, text="Min Stretch", command=go_min_setter, font="TimesNewRo
 Canvas(button_frame, width=1, height=1).pack()
 go_max = IntVar()
 go_max.set(0)
+
 def go_max_setter():
     go_max.set(1)
 Button(button_frame, text="Max Stretch", command=go_max_setter, font="TimesNewRoman 28").pack()
 Canvas(button_frame, width=1, height=1).pack()
+
 v_zero = IntVar()
 v_zero.set(0)
-def v_zero_setter():
-    v_zero.set(1)
-Button(button_frame, text="Home & Reset", command=v_zero_setter,font="TimesNewRoman 28").pack()
+
+reset = IntVar()
+reset.set(0)
+def reset_setter():
+    reset.set(1)
+
+Button(button_frame, text="Home & Reset", command=reset_setter,font="TimesNewRoman 28").pack()
 Canvas(button_frame, width=1, height=30).pack()
 control_frame.pack(side=LEFT)
 
@@ -131,8 +137,6 @@ def write():
 
 
 def button_reset():
-    if v_zero.get() == 1:
-        v_zero.set(0)
     if go_max.get() == 1:
         go_max.set(0)
     if go_min.get() == 1:
