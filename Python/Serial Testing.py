@@ -5,7 +5,8 @@ import time
 import pickle
 import struct
 
-serStepper = serial.Serial('/dev/cu.usbmodem1421', 230400)
+serStepper = serial.Serial('/dev/cu.usbmodem14231', 230400)
+time.sleep(3)
 
 def output_encoder(value):
     """
@@ -79,5 +80,4 @@ def go(pos=0):
     received = time.time()
     print(str(received - sent))
 
-
-go(0x2700)
+go(0x0000)

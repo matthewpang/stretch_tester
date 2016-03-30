@@ -133,6 +133,7 @@ def write():
     a[9] = mode.get()
     a[10] = reset.get()
     pickle.dump(a, file)
+
     root.after(100, write)
 
 
