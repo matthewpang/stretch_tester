@@ -84,7 +84,7 @@ void loop() {
     accelStepper.moveTo(destination); 
   }
   else if (input == 0xFF01) { // 0xFF01 - Homing Op Code, Blocking
-    accelStepper.moveTo(-64000 * 8);
+    accelStepper.moveTo(-64000 * 5);
     while (abs(accelStepper.distanceToGo()) > 0) {
       accelStepper.run();
     }
@@ -93,7 +93,7 @@ void loop() {
   }
   if ((abs(accelStepper.distanceToGo()) == 0) && (arrival == 0)) {
     send_output(0xFF00); // send arrival opcode
-    stepper.disableDriver(); //disable the driver when we have arrived
+    //stepper.disableDriver(); //disable the driver when we have arrived
     arrival = 1;
   }
   /*
